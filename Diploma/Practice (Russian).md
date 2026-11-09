@@ -52,7 +52,7 @@ interface/print
 ![Pasted image 20261101150146](images/Pasted%20image%2020261101150146.png)
 
 `ether1` - наша локальная сеть. В настройках MicroTik данный интерфейс имеет локальный сегмент **host1**.
-![Pasted image 20261101150804](/images/Pasted%20image%2020261101150804.png)
+![Pasted image 20261101150804](images/Pasted%20image%2020261101150804.png)
 
 `ether2` - публичная сеть. В настройках MicroTik данный интерфейс имеет локальный сегмент **network**.
 ![Pasted image 20261101150931](images/Pasted%20image%2020261101150931.png)
