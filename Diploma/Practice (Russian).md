@@ -33,7 +33,7 @@
 
 ### Overview
 В виртуальной среде мы будем настраивать следующий стенд:
-![[Pasted image 20261101183745.png]]
+![Pasted image 20261101183745](Pasted%20image%2020261101183745.png)
 
 ### Private Network A:
 
@@ -50,13 +50,13 @@ MicroTik 1 является роутером для внутренней под�
 interface/print
 ```
 
-![[Pasted image 20261101150146.png]]
+![Pasted image 20261101150146](Pasted%20image%2020261101150146.png)
 
 `ether1` - наша локальная сеть. В настройках MicroTik данный интерфейс имеет локальный сегмент **host1**.
-![[Pasted image 20261101150804.png]]
+![Pasted image 20261101150804](Pasted%20image%2020261101150804.png)
 
 `ether2` - публичная сеть. В настройках MicroTik данный интерфейс имеет локальный сегмент **network**.
-![[Pasted image 20261101150931.png]]
+![Pasted image 20261101150931](Pasted%20image%2020261101150931.png)
 
 Добавляем на интерфейс для локальной сети пул адресов и указываем шлюз `192.168.1.1`. 
 
@@ -65,20 +65,20 @@ ip/address/add address=192.168.1.1/24 interface=ether1
 ip/address/print
 ```
 
-![[Pasted image 20261101151335.png]]
+![Pasted image 20261101151335](Pasted%20image%2020261101151335.png)
 
 #### Host 1 (Linux)
 В настройках виртуальной машины **Network Adapter** установлен в **LAN Segment** и выбран сегмент `host1`
-![[Pasted image 20261101153639.png]]
+![Pasted image 20261101153639](Pasted%20image%2020261101153639.png)
 
 Открываем настройки подключения к сети:
-![[Pasted image 20261101152935.png]]
+![Pasted image 20261101152935](Pasted%20image%2020261101152935.png)
 
 Переходим к настройкам проводного подключения:
-![[Pasted image 20261101152950.png]]
+![Pasted image 20261101152950](Pasted%20image%2020261101152950.png)
 
 Открываем настройки IPv4:
-![[Pasted image 20261101153003.png]]
+![Pasted image 20261101153003](Pasted%20image%2020261101153003.png)
 
 В метод IPv4 указываем "вручную". 
 **Адрес:** `192.168.1.10`
@@ -86,15 +86,15 @@ ip/address/print
 **Шлюз:** `192.168.1.1`
 
 Применяем изменения:
-![[Pasted image 20261101153209.png]]
+![Pasted image 20261101153209](Pasted%20image%2020261101153209.png)
 
 После этого перезапускаем службу `NetworkManager`:
-![[Pasted image 20261101153709.png]]
+![Pasted image 20261101153709](Pasted%20image%2020261101153709.png)
 
 Проверяем, что соединение с MicroTik 1 существует с помощью команды `ping`:
-![[Pasted image 20261101153812.png]]
+![Pasted image 20261101153812](Pasted%20image%2020261101153812.png)
 
-![[Pasted image 20261101162202.png]]
+![Pasted image 20261101162202](Pasted%20image%2020261101162202.png)
 В моем случае ping проходит, значит все настроено верно. 
 
 
@@ -114,7 +114,7 @@ MicroTik 2 является роутером для внутренней под�
 interface/print
 ```
 
-![[Pasted image 20261101154342.png]]
+![Pasted image 20261101154342](Pasted%20image%2020261101154342.png)
 
 Добавляем пул адресов на интерфейс `ether1`:
 
@@ -123,16 +123,16 @@ ip/address/add address=192.168.1.1/24 interface=ether1
 ip/address/print
 ```
 
-![[Pasted image 20261101154609.png]]
+![Pasted image 20261101154609](Pasted%20image%2020261101154609.png)
 
 #### Host 2 (Linux)
 Убеждаемся, что в настройках виртуальной машины **Host 2** правильно настроен интерфейс: 
-![[Pasted image 20261101155047.png]]
+![Pasted image 20261101155047](Pasted%20image%2020261101155047.png)
 
 Так как на **Host 1** мы настроили статический адрес с помощью графической оболочки, на **Host 2** сделаем это с помощью терминала:
 
 С помощью команды `ip -c a` узнаем интерфейсы:
-![[Pasted image 20261101155452.png]]
+![Pasted image 20261101155452](Pasted%20image%2020261101155452.png)
 Нас интересует интерфей1с **ens33**. Сейчас на нем нет ip.
 
 Открываем файл `00-installer-config.yaml`:
@@ -145,7 +145,7 @@ sudo nano /etc/netplan/00-installer-config.yaml
 Добавляем информацию о шлюзе с помощью `routes`. Добавляем информацию о том, какому демону передать управление сетью, в нашем случае **NetworkManager**.
 
 В конце должен получиться следующее содержание файла
-![[Pasted image 20261101161148.png]]
+![Pasted image 20261101161148](Pasted%20image%2020261101161148.png)
 
 ```python
 network:
@@ -169,18 +169,18 @@ network:
 ```bash
 sudo netplan apply
 ```
-![[Pasted image 20261101161206.png]]
+![Pasted image 20261101161206](Pasted%20image%2020261101161206.png)
 
 Проверяем, что ip адрес появился: 
-![[Pasted image 20261101161828.png]]
+![Pasted image 20261101161828](Pasted%20image%2020261101161828.png)
 
 Проверяем, что microtik и linux имеют соединение:
 
 Linux:
-![[Pasted image 20261101161945.png]]
+![Pasted image 20261101161945](Pasted%20image%2020261101161945.png)
 
 MicroTik:
-![[Pasted image 20261101162040.png]]
+![Pasted image 20261101162040](Pasted%20image%2020261101162040.png)
 
 
 #### MicroTik 1 and MicroTik 2 connection
@@ -193,7 +193,7 @@ ip/address/add address=203.0.113.1/24 interface=ether2
 ip/address/print
 ```
 
-![[Pasted image 20261101170155.png]]
+![Pasted image 20261101170155](Pasted%20image%2020261101170155.png)
 
 Теперь настроим NAT:
 
@@ -201,7 +201,7 @@ ip/address/print
 /ip/firewall/nat/add action=masquerade chain=srcnat out-interface=ether2
 ```
 
-![[Pasted image 20261101171534.png]]
+![Pasted image 20261101171534](Pasted%20image%2020261101171534.png)
 
 - `/ip/firewall/nat/add`: добавить новое правило NAT.
 - `action=masquerade`: заменить исходный IP-адрес пакета на IP-адрес выходного интерфейса. Если необходимо, также изменить порт.
@@ -217,7 +217,7 @@ ip/address/add address=203.0.113.2/24 interface=ether2
 ip/address/print
 ```
 
-![[Pasted image 20261101172018.png]]
+![Pasted image 20261101172018](Pasted%20image%2020261101172018.png)
 
 Теперь настроим NAT:
 
@@ -225,16 +225,16 @@ ip/address/print
 /ip/firewall/nat/add action=masquerade chain=srcnat out-interface=ether2
 ```
 
-![[Pasted image 20261101172059.png]]
+![Pasted image 20261101172059](Pasted%20image%2020261101172059.png)
 
 ##### Connection between MicroTik 1 and MicroTik 2
 Проверяем, что **MicroTik1** и **MicroTik2** соединяются c помощью команды `ping`:
 
 **MicroTik1** ping:
-![[Pasted image 20261101172653.png]]
+![Pasted image 20261101172653](Pasted%20image%2020261101172653.png)
 
 **MicroTik2** ping:
-![[Pasted image 20261101172725.png]]
+![Pasted image 20261101172725](Pasted%20image%2020261101172725.png)
 
 Ping проходит, а значит соединение есть. 
 
@@ -243,42 +243,42 @@ Ping проходит, а значит соединение есть.
 Попробуем пропинговать MicroTik2 с Host1 и после MicroTik1 с Host2.
 
 **Host1:**
-![[Pasted image 20261101173008.png]]
+![Pasted image 20261101173008](Pasted%20image%2020261101173008.png)
 
 **Host2:**
-![[Pasted image 20261101173050.png]]
+![Pasted image 20261101173050](Pasted%20image%2020261101173050.png)
 **Ping** проходит, значит **NAT** работает. 
 
 
 ### Public Host
 
 В настройках виртуальной машины в **Network Adapter** ставим натсройки **LAN segment** как `network`:
-![[Pasted image 20261101173559.png]]
+![Pasted image 20261101173559](Pasted%20image%2020261101173559.png)
 
 В настройках **Public Host** ставим статический адрес:
 
-![[Pasted image 20261101173724.png]]
+![Pasted image 20261101173724](Pasted%20image%2020261101173724.png)
 
 Пробуем пропинговать **Microtik1** и **Microtik2**:
-![[Pasted image 20261101173831.png]]
+![Pasted image 20261101173831](Pasted%20image%2020261101173831.png)
 
 Попробуем с **Host1** пропинговать **PublicHost**:
-![[Pasted image 20261101173949.png]]
+![Pasted image 20261101173949](Pasted%20image%2020261101173949.png)
 
 Попробуем с **Host2** пропинговать **PublicHost**:
-![[Pasted image 20261101174241.png]]
+![Pasted image 20261101174241](Pasted%20image%2020261101174241.png)
 
 Попробуем с **PublicHost** пропинговать **Host1**/**Host2**:
-![[Pasted image 20261101174329.png]]
+![Pasted image 20261101174329](Pasted%20image%2020261101174329.png)
 *Network Unreachable.*
 
 ### Download Coturn on PublicHost
 Для скачивания нам понадобиться реальный выход в интернет.
 Для этого заходим в настройки виртуальной машины и добавляем еще один сетевой адаптер:
-![[Pasted image 20261101174645.png]]
+![Pasted image 20261101174645](Pasted%20image%2020261101174645.png)
 
 Оставим его в режиме NAT:
-![[Pasted image 20261101174724.png]]
+![Pasted image 20261101174724](Pasted%20image%2020261101174724.png)
 
 
 Внутри виртуальной машины проверяем, что появился доступ в интернет c помощью пинга:
@@ -287,7 +287,7 @@ Ping проходит, а значит соединение есть.
 ping 8.8.8.8
 ```
 
-![[Pasted image 20261101174810.png]]
+![Pasted image 20261101174810](Pasted%20image%2020261101174810.png)
 
 Теперь устанавливаем `coutun`:
 
@@ -296,14 +296,14 @@ sudo apt update
 sudo apt install coturn
 ```
 
-![[Pasted image 20261101175157.png]]
+![Pasted image 20261101175157](Pasted%20image%2020261101175157.png)
 
 После успешной установки, можно удалить сетевой адаптер:
-![[Pasted image 20261101175354.png]]
+![Pasted image 20261101175354](Pasted%20image%2020261101175354.png)
 
 ### Настроим Coturn
 Разрешим запускать `turnserver` автоматически как системную службу при загрузке Ubuntu. Для этого отредактируем файл `/etc/default/coturn` и расскоментируем следующую строку:
-![[Pasted image 20261101180025.png]]
+![Pasted image 20261101180025](Pasted%20image%2020261101180025.png)
 
 ### Настроим STUN сервер
 
@@ -325,7 +325,7 @@ sudo ufw allow 3478/udp
 sudo ufw allow 3478/tcp
 ```
 
-![[Pasted image 20261101181339.png]]
+![Pasted image 20261101181339](Pasted%20image%2020261101181339.png)
 
 Перезапускаем `coturn` с помощью команды:
 ```bash
@@ -335,7 +335,7 @@ sudo systemctl restart coturn
 #### Настроить Coturn на Host1
 
 В настройках виртуальной машины добавляем сетевой адаптер с типом NAT:
-![[Pasted image 20261101182248.png]]
+![Pasted image 20261101182248](Pasted%20image%2020261101182248.png)
 
 Установим **coturn**:
 
@@ -344,10 +344,10 @@ sudo apt update
 sudo apt install coturn
 ```
 
-![[Pasted image 20261101182549.png]]
+![Pasted image 20261101182549](Pasted%20image%2020261101182549.png)
 
 Удаляем сетевой адаптер:
-![[Pasted image 20261101182638.png]]
+![Pasted image 20261101182638](Pasted%20image%2020261101182638.png)
 
 Выполним запрос к внешнему серверу (STUN):
 
@@ -355,12 +355,12 @@ sudo apt install coturn
 turnutils_stunclient -p 3478 203.0.113.10
 ```
 
-![[Pasted image 20261101182912.png]]
+![Pasted image 20261101182912](Pasted%20image%2020261101182912.png)
 
 Можно заметить, что **STUN сервер** выдал нам наш публичный ip и port, который присвоил NAT, который настроен на **MicroTik1**.
 ### Set up a TURN server
 
-Аналогично скачиванию клиента **cuturn** на **host1** в разделе [[#Настроить Coturn на Host1|Настроить Coturn на Host1]] скачиваем клиент на **host2**.
+Аналогично скачиванию клиента **cuturn** на **host1** в разделе [Настроить Coturn на Host1](#Настроить%20Coturn%20на%20Host1) скачиваем клиент на **host2**.
 
 
 ### Установка Wireshark
@@ -371,21 +371,21 @@ sudo apt install wireshark
 ```
 
 Выбираем "Да":
-![[Pasted image 20261109154746.png]]
+![Pasted image 20261109154746](Pasted%20image%2020261109154746.png)
 
 ### Проанализируем пакеты с помощью Wireshark
 #### Проанализируем STUN
 С помощью команды `ip -c a` узнаем название интерфейса. В моем случае это `ens33`:
-![[Pasted image 20261109155344.png]]
+![Pasted image 20261109155344](Pasted%20image%2020261109155344.png)
 
 Запускаем **wireshark** с правами администратора:
-![[Pasted image 20261109155213.png]]
+![Pasted image 20261109155213](Pasted%20image%2020261109155213.png)
 
 Выбираем интерфейс `ens33`:
-![[Pasted image 20261109155634.png]]
+![Pasted image 20261109155634](Pasted%20image%2020261109155634.png)
 
 Начинается захват пакетов:
-![[Pasted image 20261109155706.png]]
+![Pasted image 20261109155706](Pasted%20image%2020261109155706.png)
 
 В новом терминале отправляем запрос к STUN серверу:
 
@@ -393,7 +393,7 @@ sudo apt install wireshark
 turnutils_stunclient -p 3478 203.0.113.10
 ```
 
-![[Pasted image 20261109155755.png]]
+![Pasted image 20261109155755](Pasted%20image%2020261109155755.png)
 
 Возвращаемся в Wireshark и фильтруем пакеты по ip stun сервера:
 
@@ -401,24 +401,24 @@ turnutils_stunclient -p 3478 203.0.113.10
 ip.addr == 203.0.113.10
 ```
 
-![[Pasted image 20261109155956.png]]
+![Pasted image 20261109155956](Pasted%20image%2020261109155956.png)
 
 Мы видим два пакета. Давайте проанализируем их ближе:
 
 ##### Binding Request 
 Первый пакет отправляет клиент. Он называется `Binding Request`.
-![[Pasted image 20261109160334.png]]
-![[Pasted image 20261109161754.png]]
+![Pasted image 20261109160334](Pasted%20image%2020261109160334.png)
+![Pasted image 20261109161754](Pasted%20image%2020261109161754.png)
 
 Пакет STUN состоит следующим образом:
-![[Pasted image 20261109160917.png]]
+![Pasted image 20261109160917](Pasted%20image%2020261109160917.png)
 Source: https://www.rfc-editor.org/info/rfc8489/#section-5
 
 Первые два бита `00` говорят о том, что перед нами STUN пакет. 
 
 ###### Message Type
 Следующие 14 бит - это **STUN Message Type**. Это тип сообщения. Он разделен на класс (2 бита) и метод (12 бит). 
-![[Pasted image 20261109165443.png]]
+![Pasted image 20261109165443](Pasted%20image%2020261109165443.png)
 Source: https://www.rfc-editor.org/info/rfc8489/#section-5
 
 **Classes**
@@ -465,11 +465,11 @@ Message Method Assigment у нас равен 0, а значит мы испол
 - Method: `0x001` - Binding (он единственный для STUN)
 **Message Length**: равен 36 байтам, потому что появилось поле Attributes.
 **Message Transaction ID**: равен `136137a7cf6942644904ef50`, что равно Message Transaction ID запроса. То есть сервер отправил тот же Message Transaction ID, что сгенерировал пользователь. 
-![[Pasted image 20261109171830.png]]
+![Pasted image 20261109171830](Pasted%20image%2020261109171830.png)
 
 ###### Attributes
 В ответе появилось поле Attributes. Давайте рассмотрим его подробнее:
-![[Pasted image 20261109172744.png]]
+![Pasted image 20261109172744](Pasted%20image%2020261109172744.png)
 Source: https://www.rfc-editor.org/info/rfc8489/#section-14
 
 На верхнем уровне каждый атрибут имеет фиксированную структуру:

@@ -1,3 +1,4 @@
+
 ### Table of Contents
 
 - [[#Overview|Overview]]
@@ -17,10 +18,11 @@
 - [[#Set Up Coturn|Set Up Coturn]]
 - [[#Set up a STUN server|Set up a STUN server]]
 	- [[#Set up a STUN server#Test the STUN Server from Host1|Test the STUN Server from Host1]]
+- [[#Set up a TURN server|Set up a TURN server]]
 
 ### Overview
 In the virtual environment, we will set up the following test stand:
-![[Pasted image 20261101191238.png]]
+![Pasted image 20261101191238](Pasted%20image%2020261101191238.png)
 ### Private Network A:
 #### MicroTik 1
 MicroTik 1 is a router for the internal subnet, so it should have 2 interfaces:
@@ -34,13 +36,13 @@ Use following command to find out which interfaces **MikroTik1** has:
 interface/print
 ```
 
-![[Pasted image 20261101150146.png]]
+![Pasted image 20261101150146](Pasted%20image%2020261101150146.png)
 
 `ether1` -  our local network. In the MikroTik settings, this interface is assigned to the **host1** LAN segment.
-![[Pasted image 20261101150804.png]]
+![Pasted image 20261101150804](Pasted%20image%2020261101150804.png)
 
 `ether2` - public network. In the MikroTik settings, this interface belongs to the **network** LAN segment.
-![[Pasted image 20261101150931.png]]
+![Pasted image 20261101150931](Pasted%20image%2020261101150931.png)
 
 Add an address pool to the local network interface and specify the gateway `192.168.1.1`.
 ```python
@@ -48,20 +50,20 @@ ip/address/add address=192.168.1.1/24 interface=ether1
 ip/address/print
 ```
 
-![[Pasted image 20261101151335.png]]
+![Pasted image 20261101151335](Pasted%20image%2020261101151335.png)
 
 #### Host 1 (Linux)
 In the virtual machine settings, the **Network Adapter** is set to **LAN Segment**, and the `host1` segment is selected.
-![[Pasted image 20261101153639.png]]
+![Pasted image 20261101153639](Pasted%20image%2020261101153639.png)
 
 Open the network connection settings:
-![[Pasted image 20261101152935.png]]
+![Pasted image 20261101152935](Pasted%20image%2020261101152935.png)
 
 Let's move on to the connection settings:
-![[Pasted image 20261101152950.png]]
+![Pasted image 20261101152950](Pasted%20image%2020261101152950.png)
 
 Open the IPv4 settings:
-![[Pasted image 20261101153003.png]]
+![Pasted image 20261101153003](Pasted%20image%2020261101153003.png)
 
 Select **"Manual"** for the IPv4 method.
 **Address:** `192.168.1.10`
@@ -69,15 +71,15 @@ Select **"Manual"** for the IPv4 method.
 **Gateway:** `192.168.1.1`
 
 Apply the changes:
-![[Pasted image 20261101153209.png]]
+![Pasted image 20261101153209](Pasted%20image%2020261101153209.png)
 
 After that, restart the `NetworkManager` service:
-![[Pasted image 20261101153709.png]]
+![Pasted image 20261101153709](Pasted%20image%2020261101153709.png)
 
 Verify that a connection to the **MikroTik1** exists using the `ping` command:
-![[Pasted image 20261101153812.png]]
+![Pasted image 20261101153812](Pasted%20image%2020261101153812.png)
 
-![[Pasted image 20261101162202.png]]
+![Pasted image 20261101162202](Pasted%20image%2020261101162202.png)
 In my case, the ping goes through, so everything is set up correctly.
 
 ### Private Network B:
@@ -95,7 +97,7 @@ As with MicroTik 1, we have two interfaces:
 interface/print
 ```
 
-![[Pasted image 20261101154342.png]]
+![Pasted image 20261101154342](Pasted%20image%2020261101154342.png)
 
 Add an address pool to the `ether1` interface:
 ```python
@@ -103,16 +105,16 @@ ip/address/add address=192.168.1.1/24 interface=ether1
 ip/address/print
 ```
 
-![[Pasted image 20261101154609.png]]
+![Pasted image 20261101154609](Pasted%20image%2020261101154609.png)
 
 #### Host 2 (Linux)
 Let's make sure that the interface is configured correctly in the settings for the **Host 2** virtual machine:
-![[Pasted image 20261101155047.png]]
+![Pasted image 20261101155047](Pasted%20image%2020261101155047.png)
 
 Since we configured a static IP address on **Host 1** using the graphical interface, we'll do the same on **Host 2** using the terminal:
 
 Use the `ip -c a` command to list the interfaces:
-![[Pasted image 20261101155452.png]]
+![Pasted image 20261101155452](Pasted%20image%2020261101155452.png)
 We're interested in interface 1s **ens33**. It currently has no IP address.
 
 Open the `00-installer-config.yaml` file::
@@ -125,7 +127,7 @@ We'll add the address `192.168.1.10` and specify the subnet mask as `/24`.
 Add gateway information using `routes`. Add information specifying which daemon should handle network management—in our case, **NetworkManager**.
 
 The file should end up with the following content:
-![[Pasted image 20261101161148.png]]
+![Pasted image 20261101161148](Pasted%20image%2020261101161148.png)
 
 ```python
 network:
@@ -149,18 +151,18 @@ Apply the changes using the following command:
 ```bash
 sudo netplan apply
 ```
-![[Pasted image 20261101161206.png]]
+![Pasted image 20261101161206](Pasted%20image%2020261101161206.png)
 
 Let's check to see if the IP address has appeared:
-![[Pasted image 20261101161828.png]]
+![Pasted image 20261101161828](Pasted%20image%2020261101161828.png)
 
 We verify that the MikroTik and Linux systems are connected:
 
 Linux:
-![[Pasted image 20261101161945.png]]
+![Pasted image 20261101161945](Pasted%20image%2020261101161945.png)
 
 MicroTik:
-![[Pasted image 20261101162040.png]]
+![Pasted image 20261101162040](Pasted%20image%2020261101162040.png)
 
 
 ### MicroTik 1 and MicroTik 2 connection
@@ -172,14 +174,14 @@ ip/address/add address=203.0.113.1/24 interface=ether2
 ip/address/print
 ```
 
-![[Pasted image 20261101170155.png]]
+![Pasted image 20261101170155](Pasted%20image%2020261101170155.png)
 
 Now, configure NAT:
 ```python
 /ip/firewall/nat/add action=masquerade chain=srcnat out-interface=ether2
 ```
 
-![[Pasted image 20261101171534.png]]
+![Pasted image 20261101171534](Pasted%20image%2020261101171534.png)
 
 - `/ip/firewall/nat/add`: Add a new NAT rule.
 - `action=masquerade`: Replace the packet's source IP address with the IP address of the outgoing interface. Change the port as well, if necessary.
@@ -194,7 +196,7 @@ ip/address/add address=203.0.113.2/24 interface=ether2
 ip/address/print
 ```
 
-![[Pasted image 20261101172018.png]]
+![Pasted image 20261101172018](Pasted%20image%2020261101172018.png)
 
 Now, configure NAT:
 
@@ -202,16 +204,16 @@ Now, configure NAT:
 /ip/firewall/nat/add action=masquerade chain=srcnat out-interface=ether2
 ```
 
-![[Pasted image 20261101172059.png]]
+![Pasted image 20261101172059](Pasted%20image%2020261101172059.png)
 
 ##### Connection between MicroTik 1 and MicroTik 2
 Verify that **MicroTik1** and **MicroTik2** are connected using the `ping` command:
 
 **MicroTik1** ping:
-![[Pasted image 20261101172653.png]]
+![Pasted image 20261101172653](Pasted%20image%2020261101172653.png)
 
 **MicroTik2** ping:
-![[Pasted image 20261101172725.png]]
+![Pasted image 20261101172725](Pasted%20image%2020261101172725.png)
 
 The ping is successful, which means there is a connection.
 ##### Check that NAT is working
@@ -219,42 +221,42 @@ The ping is successful, which means there is a connection.
 Let's try pinging **MicroTik2** from **Host1**, and then **MicroTik1** from **Host2**.
 
 **Host1:**
-![[Pasted image 20261101173008.png]]
+![Pasted image 20261101173008](Pasted%20image%2020261101173008.png)
 
 **Host2:**
-![[Pasted image 20261101173050.png]]
+![Pasted image 20261101173050](Pasted%20image%2020261101173050.png)
 ****Ping** is successful, which means **NAT** is working.
 
 
 ### Public Host
 
 In the virtual machine settings, under **Network Adapter**, set the **LAN segment** to `network`:
-![[Pasted image 20261101173559.png]]
+![Pasted image 20261101173559](Pasted%20image%2020261101173559.png)
 
 In the **Public Host** settings, set a static address:
 
-![[Pasted image 20261101173724.png]]
+![Pasted image 20261101173724](Pasted%20image%2020261101173724.png)
 
 Let's try pinging **Microtik1** and **Microtik2**:
-![[Pasted image 20261101173831.png]]
+![Pasted image 20261101173831](Pasted%20image%2020261101173831.png)
 
 Let's try pinging **PublicHost** from **Host1**:
-![[Pasted image 20261101173949.png]]
+![Pasted image 20261101173949](Pasted%20image%2020261101173949.png)
 
 Let's try pinging **PublicHost** from **Host2**:
-![[Pasted image 20261101174241.png]]
+![Pasted image 20261101174241](Pasted%20image%2020261101174241.png)
 
 Let's try pinging **Host1**/**Host2** from **PublicHost**:
-![[Pasted image 20261101174329.png]]
+![Pasted image 20261101174329](Pasted%20image%2020261101174329.png)
 *Network Unreachable.*
 
 ### Download Coturn on PublicHost
 To download the file, we'll need a real Internet connection.
 To do this, go to the virtual machine settings and add another network adapter:
-![[Pasted image 20261101174645.png]]
+![Pasted image 20261101174645](Pasted%20image%2020261101174645.png)
 
 Let's leave it in NAT mode:
-![[Pasted image 20261101174724.png]]
+![Pasted image 20261101174724](Pasted%20image%2020261101174724.png)
 
 
 Inside the virtual machine, we verify that we have Internet access by running a `ping` command:
@@ -262,7 +264,7 @@ Inside the virtual machine, we verify that we have Internet access by running a 
 ping 8.8.8.8
 ```
 
-![[Pasted image 20261101174810.png]]
+![Pasted image 20261101174810](Pasted%20image%2020261101174810.png)
 
 Now, install `coutun`:
 ```bash
@@ -270,14 +272,14 @@ sudo apt update
 sudo apt install coturn
 ```
 
-![[Pasted image 20261101175157.png]]
+![Pasted image 20261101175157](Pasted%20image%2020261101175157.png)
 
 After successful installation, we can remove the network adapter:
-![[Pasted image 20261101175354.png]]
+![Pasted image 20261101175354](Pasted%20image%2020261101175354.png)
 
 ### Set Up Coturn
 Let's configure `turnserver` to start automatically as a system service when Ubuntu boots. To do this, edit the `/etc/default/coturn` file and uncomment the following line:
-![[Pasted image 20261101180025.png]]
+![Pasted image 20261101180025](Pasted%20image%2020261101180025.png)
 
 ### Set up a STUN server
 
@@ -298,7 +300,7 @@ sudo ufw allow 3478/udp
 sudo ufw allow 3478/tcp
 ```
 
-![[Pasted image 20261101181339.png]]
+![Pasted image 20261101181339](Pasted%20image%2020261101181339.png)
 
 Restart `coturn` using the following command:
 ```bash
@@ -307,7 +309,7 @@ sudo systemctl restart coturn
 
 #### Test the STUN Server from Host1
 In the virtual machine settings, add a network adapter of the NAT type:
-![[Pasted image 20261101182248.png]]
+![Pasted image 20261101182248](Pasted%20image%2020261101182248.png)
 
 Install **coturn**:
 ```bash
@@ -315,17 +317,17 @@ sudo apt update
 sudo apt install coturn
 ```
 
-![[Pasted image 20261101182549.png]]
+![Pasted image 20261101182549](Pasted%20image%2020261101182549.png)
 
 Removing a network adapter:
-![[Pasted image 20261101182638.png]]
+![Pasted image 20261101182638](Pasted%20image%2020261101182638.png)
 
 Send a request to an external server (STUN):
 ```bash
 turnutils_stunclient -p 3478 203.0.113.10
 ```
 
-![[Pasted image 20261101182912.png]]
+![Pasted image 20261101182912](Pasted%20image%2020261101182912.png)
 We can see that the **STUN server** provided us with our public IP address and the port assigned by the NAT configured on **MicroTik1**.
 
 ### Set up a TURN server

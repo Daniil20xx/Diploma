@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Practice (English).md",
+                "file": "Practice (Russian).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Practice (English)"
+              "title": "Practice (Russian)"
             }
           }
         ],
@@ -203,10 +203,10 @@
       "bases:Создать новую базу": false
     }
   },
-  "active": "cbcdeb1efd1fceaf",
+  "active": "7b92226f0c491438",
   "lastOpenFiles": [
-    "Practice (Russian).md",
     "Practice (English).md",
+    "Practice (Russian).md",
     "images/Pasted image 20261101145156.png",
     "images",
     "images/Pasted image 20261109172747.png",
