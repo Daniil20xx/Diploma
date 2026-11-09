@@ -56,12 +56,15 @@ In the virtual machine settings, the **Network Adapter** is set to **LAN Segment
 ![Pasted image 20261101153639](images/Pasted%20image%2020261101153639.png)
 
 Open the network connection settings:
+
 ![Pasted image 20261101152935](images/Pasted%20image%2020261101152935.png)
 
 Let's move on to the connection settings:
+
 ![Pasted image 20261101152950](images/Pasted%20image%2020261101152950.png)
 
 Open the IPv4 settings:
+
 ![Pasted image 20261101153003](images/Pasted%20image%2020261101153003.png)
 
 Select **"Manual"** for the IPv4 method.
@@ -70,15 +73,19 @@ Select **"Manual"** for the IPv4 method.
 **Gateway:** `192.168.1.1`
 
 Apply the changes:
+
 ![Pasted image 20261101153209](images/Pasted%20image%2020261101153209.png)
 
 After that, restart the `NetworkManager` service:
+
 ![Pasted image 20261101153709](images/Pasted%20image%2020261101153709.png)
 
 Verify that a connection to the **MikroTik1** exists using the `ping` command:
+
 ![Pasted image 20261101153812](images/Pasted%20image%2020261101153812.png)
 
 ![Pasted image 20261101162202](images/Pasted%20image%2020261101162202.png)
+
 In my case, the ping goes through, so everything is set up correctly.
 
 ### Private Network B:
@@ -108,15 +115,19 @@ ip/address/print
 
 #### Host 2 (Linux)
 Let's make sure that the interface is configured correctly in the settings for the **Host 2** virtual machine:
+
 ![Pasted image 20261101155047](images/Pasted%20image%2020261101155047.png)
 
 Since we configured a static IP address on **Host 1** using the graphical interface, we'll do the same on **Host 2** using the terminal:
 
 Use the `ip -c a` command to list the interfaces:
+
 ![Pasted image 20261101155452](images/Pasted%20image%2020261101155452.png)
+
 We're interested in interface 1s **ens33**. It currently has no IP address.
 
-Open the `00-installer-config.yaml` file::
+Open the `00-installer-config.yaml` file:
+
 ```bash
 sudo nano /etc/netplan/00-installer-config.yaml 
 ```
@@ -126,6 +137,7 @@ We'll add the address `192.168.1.10` and specify the subnet mask as `/24`.
 Add gateway information using `routes`. Add information specifying which daemon should handle network management—in our case, **NetworkManager**.
 
 The file should end up with the following content:
+
 ![Pasted image 20261101161148](images/Pasted%20image%2020261101161148.png)
 
 ```python
@@ -144,6 +156,7 @@ network:
           via: 192.168.1.1
   version: 2
 ```
+
 **!!! It is important that `macaddress` matches the MAC address of the network interface (use the `ip -c a` command)*
 
 Apply the changes using the following command:
