@@ -361,6 +361,117 @@ turnutils_stunclient -p 3478 203.0.113.10
 
 Аналогично скачиванию клиента **cuturn** на **host1** в разделе [Настроить Coturn на Host1](#Настроить%20Coturn%20на%20Host1) скачиваем клиент на **host2**.
 
+На **PublicHost** меняем конфигурацию turn сервера: 
+
+```bash
+sudo nano /etc/turnserver.conf 
+```
+
+```conf
+listening-ip=203.0.113.10
+listening-port=3478
+fingerpring
+
+# Add Relay port range 
+min-port=49000
+max-port=50000
+lt-cred-mech
+realm=testturnserver
+```
+
+![](Pasted%20image%2020261110172403.png)
+
+Мы добавили пару новых полей: 
+**Min-port** и **Max-port** определяют диапазон портов, которые будут выдаваться пользователям. 
+
+**lt-cred-mech** расшифровывается как **Long-Term Credential Mechanism** - механизм долговременных учётных данных. Простыми словами: включает проверку логина и пароля клиента при подключении к TURN серверу.
+
+**realm** - это область аутентификации (Authentication Realm). Простыми словами, название области, к которой относятся учётные данные.
+
+После обновляем правила firewall, чтобы пропускать трафик на нужные порты.
+
+```bash
+sudo ufw allow 49000:50000/udp
+```
+
+![](Pasted%20image%2020261110162214.png)
+
+Теперь добавим пользователей. 
+
+```bash
+sudo turnadmin -a -u host1 -p password123 -r testturnserver
+sudo turnadmin -a -u host2 -p password123 -r testturnserver
+```
+
+![](Pasted%20image%2020261110172733.png)
+![](Pasted%20image%2020261110172928.png)
+Перезапускаем `coturn` службу:
+
+``` bash
+sudo systemctl restart coturn
+```
+
+![](Pasted%20image%2020261110162354.png)
+
+Проверяем, что служба запущена без ошибок и работает:
+
+![](Pasted%20image%2020261110162528.png)
+
+На **Host1** и **Host2** установим `https://github.com/umerghafoor/P2P-STUN-TURN-client.git`:
+
+```
+git clone https://github.com/umerghafoor/P2P-STUN-TURN-client.git
+```
+
+![](Pasted%20image%2020261110184707.png)
+
+На хостах узнаем публичный ip:
+- Host1: `203.0.113.1`
+- Host2: `203.0.113.2`
+
+```bash
+turnutils_stunclient 203.0.113.10
+```
+
+![](Pasted%20image%2020261110185233.png)
+
+В данной приложении мы можем увидеть список аргументов:
+
+![](Pasted%20image%2020261110185838.png)
+
+Мы будем запускать программу следующей командой:
+
+**Host1:**
+
+```bash
+python3 ./client.py answer --turn "turn:203.0.113.10:3478" --turn-user host1 --turn-pass password123
+```
+
+![](Pasted%20image%2020261110190237.png)
+
+**Host2:**
+
+```bash
+python3 ./client.py offer --turn "turn:203.0.113.10:3478" --turn-user host1 --turn-pass password123
+```
+
+![](Pasted%20image%2020261110190258.png)
+
+Копируем сгенерированный LOCAL SDP из терминала Host2:
+
+![](Pasted%20image%2020261110190612.png)
+
+И вставляем ее в терминал **Host1**: 
+
+![](Pasted%20image%2020261110190756.png)
+
+После этого **Host1** генерирует свой LOCAL SDP. Его нужно скопировать и вставить в терминал **Host2**:
+
+![](Pasted%20image%2020261110190903.png)
+
+Вставляем в терминал Host2:
+
+ОСТАНОВИЛСЯ ТУТ... НАДО ФИКСИТЬ, СОЕДИНЕНИЯ НЕТ!
 
 ### Установка Wireshark
 Установим Wireshark для того, чтобы восстановить хронологию соединения и отправки пакетов.  Процесс установки wireshark на все хосты ubuntu един. 

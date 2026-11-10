@@ -112,7 +112,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "fb2aca6970cb899a",
@@ -219,19 +220,20 @@
   },
   "active": "178ea5928940b42f",
   "lastOpenFiles": [
+    "Pasted image 20261110190903.png",
+    "Pasted image 20261110190756.png",
+    "Pasted image 20261110190646.png",
+    "Pasted image 20261110190612.png",
+    "Pasted image 20261110190258.png",
+    "Pasted image 20261110190237.png",
+    "Pasted image 20261110185838.png",
+    "Pasted image 20261110185233.png",
+    "Pasted image 20261110184707.png",
+    "Pasted image 20261110174914.png",
+    "Pasted image 20261110172928.png",
     "Practice (English).md",
     "Practice (Russian).md",
-    "images/Pasted image 20261101150804.png",
-    "images/Pasted image 20261101145156.png",
     "images",
-    "images/Pasted image 20261109172747.png",
-    "images/Pasted image 20261109172744.png",
-    "images/Pasted image 20261109171830.png",
-    "images/Pasted image 20261109171656.png",
-    "images/Pasted image 20261109165443.png",
-    "images/Pasted image 20261109165435.png",
-    "images/Pasted image 20261109165433.png",
-    "images/Pasted image 20261109162320.png",
     "Set up a TURN server.md",
     "Добро пожаловать.md"
   ]
