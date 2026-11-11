@@ -1,27 +1,26 @@
 ### Table of Contents
-**
+
 - [[#Overview|Overview]]
-- [[#Private Network A:|Private Network A:]]
-	- [[#Private Network A:#MicroTik 1|MicroTik 1]]
+- [[#Настроим Private Network A:|Настроим Private Network A:]]
+	- [[#Настроим Private Network A:#MicroTik 1|MicroTik 1]]
 		- [[#MicroTik 1#MicroTik 1|MicroTik 1]]
-	- [[#Private Network A:#Host 1 (Linux)|Host 1 (Linux)]]
-- [[#Private Network B:|Private Network B:]]
-	- [[#Private Network B:#MicroTik 2|MicroTik 2]]
-	- [[#Private Network B:#Host 2 (Linux)|Host 2 (Linux)]]
-	- [[#Private Network B:#MicroTik 1 and MicroTik 2 connection|MicroTik 1 and MicroTik 2 connection]]
-		- [[#MicroTik 1 and MicroTik 2 connection#MicroTik 1|MicroTik 1]]
-		- [[#MicroTik 1 and MicroTik 2 connection#MicroTik 2|MicroTik 2]]
-		- [[#MicroTik 1 and MicroTik 2 connection#Connection between MicroTik 1 and MicroTik 2|Connection between MicroTik 1 and MicroTik 2]]
-		- [[#MicroTik 1 and MicroTik 2 connection#Check that NAT is working|Check that NAT is working]]
+	- [[#Настроим Private Network A:#Host 1 (Linux)|Host 1 (Linux)]]
+- [[#Настроим Private Network B:|Настроим Private Network B:]]
+	- [[#Настроим Private Network B:#MicroTik 2|MicroTik 2]]
+	- [[#Настроим Private Network B:#Host 2 (Linux)|Host 2 (Linux)]]
+	- [[#Настроим Private Network B:#Соединяем MicroTik 1 и MicroTik 2|Соединяем MicroTik 1 и MicroTik 2]]
+		- [[#Соединяем MicroTik 1 и MicroTik 2#MicroTik 1|MicroTik 1]]
+		- [[#Соединяем MicroTik 1 и MicroTik 2#MicroTik 2|MicroTik 2]]
+		- [[#Соединяем MicroTik 1 и MicroTik 2#Проверяем соединение между MicroTik 1 и MicroTik 2|Проверяем соединение между MicroTik 1 и MicroTik 2]]
+		- [[#Соединяем MicroTik 1 и MicroTik 2#Проверяем, что NAT работает|Проверяем, что NAT работает]]
 - [[#Public Host|Public Host]]
-- [[#Download Coturn on PublicHost|Download Coturn on PublicHost]]
+- [[#Установим Coturn на PublicHost|Установим Coturn на PublicHost]]
 - [[#Настроим Coturn|Настроим Coturn]]
 - [[#Настроим STUN сервер|Настроим STUN сервер]]
 	- [[#Настроим STUN сервер#Настроить Coturn на Host1|Настроить Coturn на Host1]]
-- [[#Set up a TURN server|Set up a TURN server]]
 - [[#Установка Wireshark|Установка Wireshark]]
-- [[#Проанализируем пакеты с помощью Wireshark|Проанализируем пакеты с помощью Wireshark]]
-	- [[#Проанализируем пакеты с помощью Wireshark#Проанализируем STUN|Проанализируем STUN]]
+- [[#Проанализируем пакеты с помощью Wireshark (STUN)|Проанализируем пакеты с помощью Wireshark (STUN)]]
+	- [[#Проанализируем пакеты с помощью Wireshark (STUN)#Проанализируем STUN|Проанализируем STUN]]
 		- [[#Проанализируем STUN#Binding Request|Binding Request]]
 			- [[#Binding Request#Message Type|Message Type]]
 			- [[#Binding Request#Message Length|Message Length]]
@@ -29,12 +28,15 @@
 			- [[#Binding Request#Transaction ID|Transaction ID]]
 		- [[#Проанализируем STUN#Binding Success Response|Binding Success Response]]
 			- [[#Binding Success Response#Attributes|Attributes]]
+- [[#Настроим TURN сервер|Настроим TURN сервер]]
+- [[#Проанализируем пакеты с помощью Wireshark (TURN)|Проанализируем пакеты с помощью Wireshark (TURN)]]
+- [[#Other setup (JISTI) not complete, does not good solution to analyze turn.|Other setup (JISTI) not complete, does not good solution to analyze turn.]]
 
 ### Overview
 В виртуальной среде мы будем настраивать следующий стенд:
 ![Pasted image 20261101183745](images/Pasted%20image%2020261101183745.png)
 
-### Private Network A:
+### Настроим Private Network A:
 
 #### MicroTik 1
 MicroTik 1 является роутером для внутренней подсети, так что у него должно быть 2 интерфейса:
@@ -97,7 +99,7 @@ ip/address/print
 В моем случае ping проходит, значит все настроено верно. 
 
 
-### Private Network B:
+### Настроим Private Network B:
 
 #### MicroTik 2
 MicroTik 2 является роутером для внутренней подсети, так что у него должно быть 2 интерфейса:
@@ -182,7 +184,7 @@ MicroTik:
 ![Pasted image 20261101162040](images/Pasted%20image%2020261101162040.png)
 
 
-#### MicroTik 1 and MicroTik 2 connection
+#### Соединяем MicroTik 1 и MicroTik 2
 
 ##### MicroTik 1
 Добавляем ip адреса на интерфейс `ether2`:
@@ -226,7 +228,7 @@ ip/address/print
 
 ![Pasted image 20261101172059](images/Pasted%20image%2020261101172059.png)
 
-##### Connection between MicroTik 1 and MicroTik 2
+##### Проверяем соединение между MicroTik 1 и MicroTik 2
 Проверяем, что **MicroTik1** и **MicroTik2** соединяются c помощью команды `ping`:
 
 **MicroTik1** ping:
@@ -237,7 +239,7 @@ ip/address/print
 
 Ping проходит, а значит соединение есть. 
 
-##### Check that NAT is working
+##### Проверяем, что NAT работает
 
 Попробуем пропинговать MicroTik2 с Host1 и после MicroTik1 с Host2.
 
@@ -271,7 +273,7 @@ Ping проходит, а значит соединение есть.
 ![Pasted image 20261101174329](images/Pasted%20image%2020261101174329.png)
 *Network Unreachable.*
 
-### Download Coturn on PublicHost
+### Установим Coturn на PublicHost
 Для скачивания нам понадобиться реальный выход в интернет.
 Для этого заходим в настройки виртуальной машины и добавляем еще один сетевой адаптер:
 ![Pasted image 20261101174645](images/Pasted%20image%2020261101174645.png)
@@ -357,121 +359,6 @@ turnutils_stunclient -p 3478 203.0.113.10
 ![Pasted image 20261101182912](images/Pasted%20image%2020261101182912.png)
 
 Можно заметить, что **STUN сервер** выдал нам наш публичный ip и port, который присвоил NAT, который настроен на **MicroTik1**.
-### Set up a TURN server
-
-Аналогично скачиванию клиента **cuturn** на **host1** в разделе [Настроить Coturn на Host1](#Настроить%20Coturn%20на%20Host1) скачиваем клиент на **host2**.
-
-На **PublicHost** меняем конфигурацию turn сервера: 
-
-```bash
-sudo nano /etc/turnserver.conf 
-```
-
-```conf
-listening-ip=203.0.113.10
-listening-port=3478
-fingerpring
-
-# Add Relay port range 
-min-port=49000
-max-port=50000
-lt-cred-mech
-realm=testturnserver
-```
-
-![](Pasted%20image%2020261110172403.png)
-
-Мы добавили пару новых полей: 
-**Min-port** и **Max-port** определяют диапазон портов, которые будут выдаваться пользователям. 
-
-**lt-cred-mech** расшифровывается как **Long-Term Credential Mechanism** - механизм долговременных учётных данных. Простыми словами: включает проверку логина и пароля клиента при подключении к TURN серверу.
-
-**realm** - это область аутентификации (Authentication Realm). Простыми словами, название области, к которой относятся учётные данные.
-
-После обновляем правила firewall, чтобы пропускать трафик на нужные порты.
-
-```bash
-sudo ufw allow 49000:50000/udp
-```
-
-![](Pasted%20image%2020261110162214.png)
-
-Теперь добавим пользователей. 
-
-```bash
-sudo turnadmin -a -u host1 -p password123 -r testturnserver
-sudo turnadmin -a -u host2 -p password123 -r testturnserver
-```
-
-![](Pasted%20image%2020261110172733.png)
-![](Pasted%20image%2020261110172928.png)
-Перезапускаем `coturn` службу:
-
-``` bash
-sudo systemctl restart coturn
-```
-
-![](Pasted%20image%2020261110162354.png)
-
-Проверяем, что служба запущена без ошибок и работает:
-
-![](Pasted%20image%2020261110162528.png)
-
-На **Host1** и **Host2** установим `https://github.com/umerghafoor/P2P-STUN-TURN-client.git`:
-
-```
-git clone https://github.com/umerghafoor/P2P-STUN-TURN-client.git
-```
-
-![](Pasted%20image%2020261110184707.png)
-
-На хостах узнаем публичный ip:
-- Host1: `203.0.113.1`
-- Host2: `203.0.113.2`
-
-```bash
-turnutils_stunclient 203.0.113.10
-```
-
-![](Pasted%20image%2020261110185233.png)
-
-В данной приложении мы можем увидеть список аргументов:
-
-![](Pasted%20image%2020261110185838.png)
-
-Мы будем запускать программу следующей командой:
-
-**Host1:**
-
-```bash
-python3 ./client.py answer --turn "turn:203.0.113.10:3478" --turn-user host1 --turn-pass password123
-```
-
-![](Pasted%20image%2020261110190237.png)
-
-**Host2:**
-
-```bash
-python3 ./client.py offer --turn "turn:203.0.113.10:3478" --turn-user host1 --turn-pass password123
-```
-
-![](Pasted%20image%2020261110190258.png)
-
-Копируем сгенерированный LOCAL SDP из терминала Host2:
-
-![](Pasted%20image%2020261110190612.png)
-
-И вставляем ее в терминал **Host1**: 
-
-![](Pasted%20image%2020261110190756.png)
-
-После этого **Host1** генерирует свой LOCAL SDP. Его нужно скопировать и вставить в терминал **Host2**:
-
-![](Pasted%20image%2020261110190903.png)
-
-Вставляем в терминал Host2:
-
-ОСТАНОВИЛСЯ ТУТ... НАДО ФИКСИТЬ, СОЕДИНЕНИЯ НЕТ!
 
 ### Установка Wireshark
 Установим Wireshark для того, чтобы восстановить хронологию соединения и отправки пакетов.  Процесс установки wireshark на все хосты ubuntu един. 
@@ -483,7 +370,7 @@ sudo apt install wireshark
 Выбираем "Да":
 ![Pasted image 20261109154746](images/Pasted%20image%2020261109154746.png)
 
-### Проанализируем пакеты с помощью Wireshark
+### Проанализируем пакеты с помощью Wireshark (STUN)
 #### Проанализируем STUN
 С помощью команды `ip -c a` узнаем название интерфейса. В моем случае это `ens33`:
 ![Pasted image 20261109155344](images/Pasted%20image%2020261109155344.png)
@@ -619,4 +506,194 @@ Source: https://www.rfc-editor.org/info/rfc8489/#section-14
 - **Биты 2-15 хранят** числовой код `0x0022`. По этому коду программа понимает, что внутри лежит текстовое название программного обеспечения.
 - **Length 20**: Это означает, что полезные данные в поле Value занимают ровно 20 байт.
 - **Value**: Содержит чистый текст "Coturn-4.6.1 'Gorst'". Так как длина текста составляет ровно 20 байт и без остатка делится на 4, серверу не пришлось добавлять в конец пустые байты для выравнивания.
+
+### Настроим TURN сервер
+
+Аналогично скачиванию клиента **cuturn** на **host1** в разделе [Настроить Coturn на Host1](#Настроить%20Coturn%20на%20Host1) скачиваем клиент на **host2**.
+
+На **PublicHost** меняем конфигурацию turn сервера: 
+
+```bash
+sudo nano /etc/turnserver.conf 
+```
+
+```conf
+listening-ip=203.0.113.10
+listening-port=3478
+fingerpring
+
+# Add Relay port range 
+min-port=49000
+max-port=50000
+lt-cred-mech
+realm=testturnserver
+```
+
+![](images/Pasted%20image%2020261110172403.png)
+
+Мы добавили пару новых полей: 
+**Min-port** и **Max-port** определяют диапазон портов, которые будут выдаваться пользователям. 
+
+**lt-cred-mech** расшифровывается как **Long-Term Credential Mechanism** - механизм долговременных учётных данных. Простыми словами: включает проверку логина и пароля клиента при подключении к TURN серверу.
+
+**realm** - это область аутентификации (Authentication Realm). Простыми словами, название области, к которой относятся учётные данные.
+
+После обновляем правила firewall, чтобы пропускать трафик на нужные порты.
+
+```bash
+sudo ufw allow 49000:50000/udp
+```
+
+![](images/Pasted%20image%2020261110162214.png)
+
+Теперь добавим пользователей. 
+
+```bash
+sudo turnadmin -a -u host1 -p password123 -r testturnserver
+sudo turnadmin -a -u host2 -p password123 -r testturnserver
+```
+
+![](images/Pasted%20image%2020261110172733.png)
+![](images/Pasted%20image%2020261110172928.png)
+Перезапускаем `coturn` службу:
+
+``` bash
+sudo systemctl restart coturn
+```
+
+![](images/Pasted%20image%2020261110162354.png)
+
+Проверяем, что служба запущена без ошибок и работает:
+
+![](images/Pasted%20image%2020261110162528.png)
+
+Чтобы проверить работоспособность TURN сервер, воспользуемся той же утилитой `turnutils_uclient` - эта команда имитирует звонок/чат и начинает непрерывно слать TURN-пакеты.
+
+```bash
+turnutils_uclient -y -u host1 -w password123 -p 3478 203.0.113.10
+```
+
+Разберем, что здесь происходит:
+Флаг `-y` говорит, что не нужно указывать, кому отправлять пакеты. Утилита сама создаст пару клиентов и свяжет их между собой через TURN. Трафик гарантированно пойдет через Relay в обе стороны.
+
+`-u host1 -w password123` указываем пользователя, которого создали на turn сервере. 
+
+`-p 3478 203.0.113.10` указываем порт и адрес TURN сервера. 
+
+![](images/Pasted%20image%2020261111182405.png)
+
+Можно заметить, что все работает. 
+
+### Проанализируем пакеты с помощью Wireshark (TURN)
+
+Запускаем **wireshark** на **Host1** и выбираем внутренний интерфейс:
+
+![](images/Pasted%20image%2020261111182539.png)
+
+В терминале запускаем `turnutils_uclient` утилиту в формате **client-to-client**.
+
+![](images/Pasted%20image%2020261111182731.png)
+
+Отфильтруем пакеты по ip публичного сервера:
+
+```wireshark
+ip.addr == 203.0.113.10
+```
+
+![](images/Pasted%20image%2020261111182959.png)
+
+Видно, что первый запрос был `Allocate Request`. 
+
+### Other setup (JISTI) not complete, does not good solution to analyze turn.
+
+Работоспособность **TURN сервера** будем проверять с помощью приложения **Jisti**. 
+
+На **PublicHost** разворачиваем **Jisti**. Я его буду устанавливать через Docker, поэтому сначала установим необходимые пакеты:
+
+```bash
+sudo apt update
+sudo apt install docker.io docker-compose-v2 curl unzip
+sudo systemctl enable docker
+sudo systemctl start docker
+```
+
+![](images/Pasted%20image%2020261111170417.png)
+
+Создаем папку и скачиваем последнюю версию jisti:
+```bash
+mkdir ~/jisti
+cd ~/jisti
+```
+
+```bash
+wget -q -O - https://api.github.com/repos/jitsi/docker-jitsi-meet/releases/latest > jisti.json
+wget $(cat jisti.json | grep zip | cut -d '"' -f 4)
+rm jisti.json
+```
+
+После этого у нас появляется архив c **jisti**:
+
+![](images/Pasted%20image%2020261111170913.png)
+
+Распаковываем архив:
+
+```bash
+unzip ./*
+```
+
+![](images/Pasted%20image%2020261111171018.png)
+
+Создаём конфигурацию:
+
+```bash
+cd jitsi-docker-jitsi-meet-*
+cp env.example .env
+./gen-passwords.sh
+```
+
+`./gen-passwords.sh`: автоматически генерирует внутренние пароли компонентов **Jitsi**.
+
+Теперь отредактируем конфигурацию:
+
+```bash
+nano .env
+```
+
+```bash
+PUBLIC_URL=https://203.0.113.10:8443
+ENABLE_LETSENCRYPT=0
+JVB_ADVERTISE_IPS=203.0.113.10
+```
+
+`ENABLE_LETSENCRYPT=0` отключает получение сертификата **Let's Encrypt**. Для изолированной лаборатории используем стандартный самоподписанный сертификат.
+
+`JVB_ADVERTISE_IPS` указывает адрес, который Jitsi Videobridge будет сообщать клиентам для передачи медиатрафика.
+
+---
+
+.... Дополнить про запуск Docker и дополнительные настройки (Нет, так как возникла проблема и пока фиксил ее не стал записывать, чтобы не закопаться)
+
+Думал использовать jisti для примера TURN сервера, где трафик должен был бы пересылаться с помощью coturn, но так настроить не получилось. К тому же нашел способ проще проанализировтаь трафик TURN с помощью утилиты `turnutils_...`
+
+---
+
+На Host1 открываем сайт:
+
+```
+https://203.0.113.10:8443/
+```
+
+![](images/Pasted%20image%2020261111173808.png)
+
+Создаем комнату и подключаемся к ней:
+
+![](images/Pasted%20image%2020261111173855.png)
+
+На **Host2** подключаемся к комнате:
+![](images/Pasted%20image%2020261111173957.png)
+
+Как можно заметить, оба участника находиться в одной комнате:
+
+![](images/Pasted%20image%2020261111174047.png)
+
 
