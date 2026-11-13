@@ -30,7 +30,26 @@
 			- [[#Binding Success Response#Attributes|Attributes]]
 - [[#Настроим TURN сервер|Настроим TURN сервер]]
 - [[#Проанализируем пакеты с помощью Wireshark (TURN)|Проанализируем пакеты с помощью Wireshark (TURN)]]
-- [[#Other setup (JISTI) not complete, does not good solution to analyze turn.|Other setup (JISTI) not complete, does not good solution to analyze turn.]]
+	- [[#Проанализируем пакеты с помощью Wireshark (TURN)#Wireshark Packets|Wireshark Packets]]
+			- [[#Binding Success Response#Allocate Request|Allocate Request]]
+			- [[#Binding Success Response#Allocate Error Response|Allocate Error Response]]
+			- [[#Binding Success Response#Allocate Request|Allocate Request]]
+			- [[#Binding Success Response#Allocate Success Response|Allocate Success Response]]
+			- [[#Binding Success Response#Refresh Request|Refresh Request]]
+			- [[#Binding Success Response#Refresh Responce|Refresh Responce]]
+			- [[#Binding Success Response#Channel-Bind Request|Channel-Bind Request]]
+			- [[#Binding Success Response#Channel-Bind Success Responce|Channel-Bind Success Responce]]
+			- [[#Binding Success Response#CreatePermission Request|CreatePermission Request]]
+			- [[#Binding Success Response#CreatePermission Success Response|CreatePermission Success Response]]
+			- [[#Binding Success Response#TURN ChannelData Message|TURN ChannelData Message]]
+	- [[#Проанализируем пакеты с помощью Wireshark (TURN)#Overview Diagrams|Overview Diagrams]]
+		- [[#Overview Diagrams#Фаза 1: Allocation on the TURN server|Фаза 1: Allocation on the TURN server]]
+		- [[#Overview Diagrams#Фаза 2:  Address exchange via the signaling server|Фаза 2:  Address exchange via the signaling server]]
+		- [[#Overview Diagrams#Фаза 3: Permissions and channel binding|Фаза 3: Permissions and channel binding]]
+		- [[#Overview Diagrams#Фаза 4: Media exchange|Фаза 4: Media exchange]]
+		- [[#Overview Diagrams#Фаза 5: Keep-alive и teardown|Фаза 5: Keep-alive и teardown]]
+- [[#NAT filtering и mapping на языке MicroTik|NAT filtering и mapping на языке MicroTik]]
+
 
 ### Overview
 В виртуальной среде мы будем настраивать следующий стенд:
@@ -586,6 +605,8 @@ turnutils_uclient -y -u host1 -w password123 -p 3478 203.0.113.10
 
 ### Проанализируем пакеты с помощью Wireshark (TURN)
 
+#### Wireshark Packets
+
 Запускаем **wireshark** на **Host1** и выбираем внутренний интерфейс:
 
 ![](images/Pasted%20image%2020261111182539.png)
@@ -600,100 +621,257 @@ turnutils_uclient -y -u host1 -w password123 -p 3478 203.0.113.10
 ip.addr == 203.0.113.10
 ```
 
+###### Allocate Request
+
 ![](images/Pasted%20image%2020261111182959.png)
 
-Видно, что первый запрос был `Allocate Request`. 
+Видно, что первый запрос был `Allocate Request`. По сути это протокол STUN, но с классов `Request` и методом `Allocate`.
 
-### Other setup (JISTI) not complete, does not good solution to analyze turn.
+`REQUESTED-TRANSPORT`: UDP Указывает транспортный протокол, который TURN-сервер должен использовать для выделяемого ретрансляционного порта (в данном случае запрашивается протокол UDP).
 
-Работоспособность **TURN сервера** будем проверять с помощью приложения **Jisti**. 
+`LIFETIME 777` Задает желаемое время жизни (в секундах) для выделенного соединения и порта на сервере. Если клиент не обновит запрос в течение 777 секунд, сервер освободит эти ресурсы.
 
-На **PublicHost** разворачиваем **Jisti**. Я его буду устанавливать через Docker, поэтому сначала установим необходимые пакеты:
+`EVEN-PORT` Требует от сервера выделить четный номер порта для ретрансляции. Это часто нужно протоколу RTP (для передачи аудио и видео), где сам медиапоток идет по четному порту, а сопутствующий протокол управления RTCP использует следующий за ним нечетный порт.
 
-```bash
-sudo apt update
-sudo apt install docker.io docker-compose-v2 curl unzip
-sudo systemctl enable docker
-sudo systemctl start docker
+`FINGERPRINT` Содержит контрольную сумму (CRC-32) всего пакета. Этот атрибут помогает получателю быстро отличить сообщения протокола STUN/TURN от пакетов других протоколов (например, RTP или DTLS), которые могут передаваться через тот же самый сетевой порт.
+
+###### Allocate Error Response
+
+![](Pasted%20image%2020261113145028.png)
+
+В ответ пришел пакет с типом сообщения `Allocate Error Response`, которое говорит, что cервер отклонил первоначальный запрос. 
+
+В атрибутах можно заметить `ERROR-CODE 401 (Unauthenticated)`, которая говорит, почему сервер отклонил первоначальный запрос. Это произошло из-за того, что сервер не авторизовался на сервере, то есть первый запрос был без учетных данных. 
+
+`NONCE: ea0d5ec5b43599f0` Уникальная случайная строка символов, сгенерированная сервером для защиты от атак повторного воспроизведения. Клиент должен включить это значение в свой следующий запрос при вычислении хеша пароля.
+
+`REALM: testturnserver` Имя области аутентификации (домена безопасности) на сервере. Оно подсказывает клиенту, какую именно пару логина и пароля нужно использовать для доступа к этому серверу.
+
+###### Allocate Request
+
+![](Pasted%20image%2020261113145641.png)
+
+Клиент снова отправляет запрос на выделение ретранслируемого адреса на TURN сервере.
+Но в отличии от первого запроса, появились такие атрибуты, как 
+- `USERNAME`: имя учетной записи клиента, от лица которой запрашивается выделение ретрансляционного порта на сервере.
+- `NONCE`: одноразовый криптографический токен, который сервер прислал в предыдущем пакете. Возвращая его обратно, клиент доказывает, что запрос свежий и не перехвачен злоумышленником ранее.
+- `MESSAGE_INTEGRITY`: криптографическая подпись пакета (HMAC-SHA1). Она вычисляется на основе содержимого всего сообщения и секретного ключа, который формируется из **USERNAME**, **REALM** и **пароля пользователя**. Этот атрибут позволяет серверу проверить подлинность клиента (не передавая сам пароль по сети в открытом виде) и убедиться, что пакет не был изменен при передаче.
+
+###### Allocate Success Response
+
+![](Pasted%20image%2020261113150739.png)
+
+В ответе мы можем заметить, что сервер прислал успешный ответ с выделенным адресом. 
+
+`XOR-RELAYED-ADDRESS: 203.0.113.10:49080`: это публичный IP-адрес и четный порт на TURN-сервере, которые выделены специально для этого клиента. Префикс XOR означает, что адрес замаскирован, чтобы промежуточные NAT-маршрутизаторы не испортили его при глубокой проверке пакетов.
+
+`XOR-MAPPED-ADDRESS: 203.0.113.1:60737`: Внешний публичный IP-адрес и порт самого клиента, какими их увидел TURN-сервер после прохождения клиентского NAT. Эта информация позволяет клиенту узнать свой публичный адрес в интернете (как при обычном STUN-запросе).
+
+`RESERVATION-TOKEN` Специальный токен резервирования, который сервер возвращает в ответ на атрибут **EVEN-PORT** из запроса. Сервер зарезервировал следующий нечетный порт (`49081`), и клиент сможет забрать его отдельным запросом, предъявив этот токен.
+
+Далее клиент запросит еще один адрес с нового порта и воспользуется `RESERVATION-TOKEN`, чтобы получить зарезервированный порт:
+
+![](Pasted%20image%2020261113152721.png)
+
+###### Refresh Request
+
+![](Pasted%20image%2020261113151505.png)
+
+Клиент отправляет этот запрос, чтобы продлить время жизни ранее выделенного ретрансляционного адреса и порта на TURN-сервере.
+
+###### Refresh Responce
+
+![](Pasted%20image%2020261113151642.png)
+
+Это ответ TURN-сервера, который подтверждает, что таймер жизни выделенного порта успешно обновлен.
+
+###### Channel-Bind Request
+
+![](Pasted%20image%2020261113152153.png)
+
+Клиент отправляет этот запрос, чтобы привязать короткий 2-байтовый номер канала к конкретному IP-адресу и порту собеседника (пира). Это позволяет в дальнейшем пересылать данные с минимальными накладными расходами (используя компактные сообщения _ChannelData_ вместо громоздких заголовков _Send/Data_). Кроме того, привязка канала автоматически создает разрешение на прием трафика от этого собеседника.
+
+`CHANNEL-NUMBER: 0x5e39`: указывает номер канала, который клиент хочет закрепить за собеседником. В дальнейшем все пакеты для этого адреса будут маркироваться именно этим коротким номером.
+
+`XOR-PEER-ADDRESS: 203.0.113.10:49081`: ip адрес и порт собеседника, с которым устанавливается обмен данными через TURN-сервер. Как и другие адреса в STUN/TURN, он замаскирован с помощью операции XOR для защиты от искажения промежуточными NAT-маршрутизаторами.
+
+###### Channel-Bind Success Responce 
+
+![](Pasted%20image%2020261113153007.png)
+
+Это ответ TURN-сервера на запрос привязки канала (пакет № 36), который подтверждает, что номер канала успешно закреплен за адресом собеседникa.
+
+###### CreatePermission Request
+
+![](Pasted%20image%2020261113153550.png)
+
+Этот запрос клиент отправляет для того, чтобы TURN-сервер разрешил прием и пересылку входящих пакетов от конкретного внешнего адреса.
+
+`XOR-PEER-ADDRESS: 203.0.113.10:49081`: указывает IP-адрес (и порт) собеседника, которому разрешается отправлять данные через выделенный порт на TURN-сервере.
+
+###### CreatePermission Success Response
+
+![](Pasted%20image%2020261113153733.png)
+
+Это подтверждение от TURN-сервера о том, что правило фильтрации создано и теперь сервер будет принимать и пересылать клиенту трафик от указанного собеседника.
+
+###### TURN ChannelData Message
+
+![](Pasted%20image%2020261113153859.png)
+
+Это уже непосредственная передача полезных данных собеседнику через привязанный ранее канал.
+
+`Channel Number: 0x5147` Двухбайтовый идентификатор канала, который клиент привязал к конкретному собеседнику
+
+`Data (100 bytes)`: сама полезная нагрузка (например, медиапакет RTP с аудио или видео), которую TURN-сервер распакует из заголовка ChannelData и отправит в чистом виде по UDP на адрес собеседника.
+
+#### Overview Diagrams
+##### Фаза 1: Allocation on the TURN server
+
+На этом этапе оба участника (Peer A и Peer B) независимо друг от друга обращаются к TURN-серверу, чтобы арендовать на нем публичный IP-адрес и порт для ретрансляции трафика. 
+
+1. Сначала каждый клиент отправляет запрос **Allocate Request** без учетных данных, так как у него еще нет актуального токена безопасности.
+2. Сервер отклоняет запрос с ошибкой **401 Unauthorized** и передает область аутентификации (**REALM**) вместе с одноразовым токеном (**NONCE**).
+3. Клиенты повторно отправляют **Allocate Request**, добавив имя пользователя (**USERNAME**) и криптографическую подпись (**MESSAGE-INTEGRITY**), вычисленную на основе пароля и полученного токена.
+4. После успешной проверки сервер выделяет каждому участнику свой внешний ретрансляционный порт (**49080** для Peer A и **55120** для Peer B).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant A as Peer A<br/>(192.168.1.10 | 203.0.113.1)
+    participant T as TURN Server<br/>(203.0.113.10)
+    participant B as Peer B<br/>(192.168.1.10 | 203.0.113.2)
+
+    par Peer A
+        A->>T: Allocate Request (no credentials)
+        T-->>A: 401 Unauthorized + REALM + NONCE
+        A->>T: Allocate Request (USERNAME + MESSAGE-INTEGRITY)
+        T-->>A: Allocate Success (relayed port 49080)
+    and Peer B
+        B->>T: Allocate Request (no credentials)
+        T-->>B: 401 Unauthorized + REALM + NONCE
+        B->>T: Allocate Request (USERNAME + MESSAGE-INTEGRITY)
+        T-->>B: Allocate Success (relayed port 55120)
+    end
 ```
 
-![](images/Pasted%20image%2020261111170417.png)
+##### Фаза 2:  Address exchange via the signaling server
 
-Создаем папку и скачиваем последнюю версию jisti:
-```bash
-mkdir ~/jisti
-cd ~/jisti
+TURN-сервер ничего не знает о том, кто с кем хочет связаться, поэтому участники обмениваются своими выделенными ретрансляционными адресами через отдельный **сигнальный сервер**.
+
+1. **Peer A** формирует приглашение на сеанс (**SDP Offer**), указывая в нем свой арендованный адрес на TURN-сервере (`203.0.113.10:49080`), и отправляет его через сигнальный сервер.
+2. **Peer B** получает это приглашение, принимает звонок и отправляет в ответ свой **SDP Answer**, в котором сообщает собственный ретрансляционный адрес (`203.0.113.10:55120`).
+3. После завершения обмена оба собеседника знают, на какой именно порт TURN-сервера нужно отправлять пакеты.
+
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant A as Peer A<br/>(192.168.1.10 | 203.0.113.1)
+    participant S as Signaling Server<br/>(SIP / WebSocket)
+    participant B as Peer B<br/>(192.168.1.10 | 203.0.113.2)
+
+    A->>S: SDP Offer (relay candidate 203.0.113.10:49080)
+    S->>B: Forward SDP Offer
+    B->>S: SDP Answer (relay candidate 203.0.113.10:55120)
+    S->>A: Forward SDP Answer
+    Note over A,B: A learns about port 55120, B learns about port 49080
 ```
 
-```bash
-wget -q -O - https://api.github.com/repos/jitsi/docker-jitsi-meet/releases/latest > jisti.json
-wget $(cat jisti.json | grep zip | cut -d '"' -f 4)
-rm jisti.json
+##### Фаза 3: Permissions and channel binding
+
+Ради безопасности по умолчанию TURN-сервер блокирует весь входящий трафик на выделенные порты. Перед началом разговора каждый участник должен открыть доступ для собеседника и настроить быстрый канал передачи.
+
+1. **Создание разрешения (CreatePermission):** Каждый участник сообщает серверу IP-адрес собеседника, с которого разрешено принимать пакеты (в данном случае оба указывают IP-адрес ретранслятора `203.0.113.10`).
+2. **Привязка канала (ChannelBind):** Чтобы не пересылать в каждом пакете длинные STUN-заголовки с полным IP-адресом и портом получателя, участники закрепляют за адресом собеседника короткий 2-байтовый идентификатор канала (**0x4000** у Peer A и **0x4001** у Peer B).
+
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant A as Peer A<br/>(192.168.1.10 | 203.0.113.1)
+    participant T as TURN Server<br/>(203.0.113.10)
+    participant B as Peer B<br/>(192.168.1.10 | 203.0.113.2)
+
+    par Peer A
+        A->>T: CreatePermission (allow 203.0.113.10)
+        T-->>A: Success
+        A->>T: ChannelBind (0x4000 <-> 203.0.113.10:55120)
+        T-->>A: Success
+    and Peer B
+        B->>T: CreatePermission (allow 203.0.113.10)
+        T-->>B: Success
+        B->>T: ChannelBind (0x4001 <-> 203.0.113.10:49080)
+        T-->>B: Success
+    end
 ```
 
-После этого у нас появляется архив c **jisti**:
+##### Фаза 4: Media exchange
 
-![](images/Pasted%20image%2020261111170913.png)
+На этом этапе начинается двусторонний обмен голосом или видео в реальном времени с использованием компактных сообщений **ChannelData** (всего 4 байта служебного заголовка вместо полноценного STUN-пакета).
 
-Распаковываем архив:
+1. **Передача от A к B:** Peer A упаковывает аудиопакет в **ChannelData** с номером канала **0x4000** и отправляет на сервер. TURN-сервер перенаправляет данные внутри себя с порта **49080** на порт **55120**, переупаковывает их в канал **0x4001** и доставляет Peer B.
+2. **Передача от B к A:** Обратный поток идет зеркально - Peer B шлет данные в канал **0x4001**, сервер перекладывает их с порта **55120** на порт **49080** и отправляет Peer A с меткой канала **0x4000**.
 
-```bash
-unzip ./*
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant A as Peer A<br/>(192.168.1.10 | 203.0.113.1)
+    participant T as TURN Server<br/>(203.0.113.10)
+    participant B as Peer B<br/>(192.168.1.10 | 203.0.113.2)
+
+    A->>T: ChannelData (0x4000 + audio)
+    T->>T: Relay inside server (port 49080 → 55120)
+    T->>B: ChannelData (0x4001 + audio)
+
+    B->>T: ChannelData (0x4001 + audio)
+    T->>T: Relay inside server (port 55120 → 49080)
+    T->>A: ChannelData (0x4000 + audio)
 ```
 
-![](images/Pasted%20image%2020261111171018.png)
+##### Фаза 5: Keep-alive и teardown
 
-Создаём конфигурацию:
+Аренда портов и привязка каналов на TURN-сервере имеют ограниченный срок действия, чтобы не занимать ресурсы сервера при обрыве связи.
 
-```bash
-cd jitsi-docker-jitsi-meet-*
-cp env.example .env
-./gen-passwords.sh
+1. **Поддержание сессии (Keep-alive):** Пока идет разговор, клиенты периодически отправляют запросы **Refresh Request** (указывая время жизни **LIFETIME = 777** секунд), чтобы сбросить таймер и продлить аренду порта.
+2. **Завершение вызова (Teardown):** Когда один из участников завершает звонок, по сигнальному серверу передается команда отбоя (**Hang-up signal**). После этого оба клиента отправляют финальный запрос **Refresh Request со значением LIFETIME = 0**, заставляя TURN-сервер немедленно закрыть выделенные порты (**49080** и **55120**) и очистить правила фильтрации.
+
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant A as Peer A<br/>(192.168.1.10 | 203.0.113.1)
+    participant T as TURN Server<br/>(203.0.113.10)
+    participant S as Signaling Server<br/>(SIP / WebSocket)
+    participant B as Peer B<br/>(192.168.1.10 | 203.0.113.2)
+
+    A->>T: Refresh Request (LIFETIME = 777)
+    T-->>A: Refresh Success (LIFETIME = 777)
+
+    A->>S: Hang-up signal
+    S->>B: Hang-up signal
+
+    par Peer A
+        A->>T: Refresh Request (LIFETIME = 0)
+        T-->>A: Success (port 49080 released)
+    and Peer B
+        B->>T: Refresh Request (LIFETIME = 0)
+        T-->>B: Success (port 55120 released)
+    end
 ```
 
-`./gen-passwords.sh`: автоматически генерирует внутренние пароли компонентов **Jitsi**.
+### NAT filtering и mapping на языке MicroTik
 
-Теперь отредактируем конфигурацию:
+По **RFC 4787** есть **3 типа mapping** и **3 типа filtering**, всего **9 комбинаций**.
 
-```bash
-nano .env
-```
-
-```bash
-PUBLIC_URL=https://203.0.113.10:8443
-ENABLE_LETSENCRYPT=0
-JVB_ADVERTISE_IPS=203.0.113.10
-```
-
-`ENABLE_LETSENCRYPT=0` отключает получение сертификата **Let's Encrypt**. Для изолированной лаборатории используем стандартный самоподписанный сертификат.
-
-`JVB_ADVERTISE_IPS` указывает адрес, который Jitsi Videobridge будет сообщать клиентам для передачи медиатрафика.
-
----
-
-.... Дополнить про запуск Docker и дополнительные настройки (Нет, так как возникла проблема и пока фиксил ее не стал записывать, чтобы не закопаться)
-
-Думал использовать jisti для примера TURN сервера, где трафик должен был бы пересылаться с помощью coturn, но так настроить не получилось. К тому же нашел способ проще проанализировтаь трафик TURN с помощью утилиты `turnutils_...`
-
----
-
-На Host1 открываем сайт:
-
-```
-https://203.0.113.10:8443/
-```
-
-![](images/Pasted%20image%2020261111173808.png)
-
-Создаем комнату и подключаемся к ней:
-
-![](images/Pasted%20image%2020261111173855.png)
-
-На **Host2** подключаемся к комнате:
-![](images/Pasted%20image%2020261111173957.png)
-
-Как можно заметить, оба участника находиться в одной комнате:
-
-![](images/Pasted%20image%2020261111174047.png)
+**Mapping (как выбирается внешний ip:port для внутреннего ip:port):**
+- **EIM (Endpoint-Independent)**: один внешний ip:port для любого получателя.
+- **ADM (Address-Dependent)**: новый внешний порт для каждого IP получателя.
+- **APDM (Address-and-Port-Dependent)**: новый внешний порт для каждой пары IP:порт получателя.
+**Filtering (кому разрешено слать пакеты на этот внешний ip:port):**
+- **EIF (Endpoint-Independent)**: кому угодно.
+- **ADF (Address-Dependent)**: только IP, которым внутренний хост уже отправлял пакеты.
+- **APDF (Address-and-Port-Dependent)**: только ip:port, которым хост уже отправлял пакеты.
 
 
