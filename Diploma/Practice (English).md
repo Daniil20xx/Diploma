@@ -1,3 +1,4 @@
+
 ### Table of Contents
 
 - [[#Overview|Overview]]
@@ -28,8 +29,8 @@
 		- [[#Analyze STUN#Binding Success Response|Binding Success Response]]
 			- [[#Binding Success Response#Attributes|Attributes]]
 - [[#Set up a TURN server|Set up a TURN server]]
-- [[#Let's Analyze Packets Using Wireshark (TURN)|Let's Analyze Packets Using Wireshark (TURN)]]
-	- [[#Let's Analyze Packets Using Wireshark (TURN)#Wireshark Packets|Wireshark Packets]]
+- [[#Analyze Packets Using Wireshark (TURN)|Analyze Packets Using Wireshark (TURN)]]
+	- [[#Analyze Packets Using Wireshark (TURN)#Wireshark Packets|Wireshark Packets]]
 			- [[#Binding Success Response#Allocate Request|Allocate Request]]
 			- [[#Binding Success Response#Allocate Error Response|Allocate Error Response]]
 			- [[#Binding Success Response#Allocate Request|Allocate Request]]
@@ -41,14 +42,13 @@
 			- [[#Binding Success Response#CreatePermission Request|CreatePermission Request]]
 			- [[#Binding Success Response#CreatePermission Success Response|CreatePermission Success Response]]
 			- [[#Binding Success Response#TURN ChannelData Message|TURN ChannelData Message]]
-	- [[#Let's Analyze Packets Using Wireshark (TURN)#Overview Diagrams|Overview Diagrams]]
+	- [[#Analyze Packets Using Wireshark (TURN)#Overview Diagrams|Overview Diagrams]]
 		- [[#Overview Diagrams#Phase 1: Allocation on the TURN server|Phase 1: Allocation on the TURN server]]
 		- [[#Overview Diagrams#Phase 2:  Address exchange via the signaling server|Phase 2:  Address exchange via the signaling server]]
 		- [[#Overview Diagrams#Phase 3: Permissions and channel binding|Phase 3: Permissions and channel binding]]
 		- [[#Overview Diagrams#Phase 4: Media exchange|Phase 4: Media exchange]]
 		- [[#Overview Diagrams#Phase 5: Keep-alive and teardown|Phase 5: Keep-alive and teardown]]
 - [[#NAT Filtering and Mapping in MicroTik|NAT Filtering and Mapping in MicroTik]]
-
 
 ### Overview
 In the virtual environment, we will set up the following test stand:
@@ -604,7 +604,7 @@ The `-y` flag indicates that you don't need to specify who to send packets to. T
 
 Everything is working.
 
-### Let's Analyze Packets Using Wireshark (TURN)
+### Analyze Packets Using Wireshark (TURN)
 
 #### Wireshark Packets
 
@@ -638,7 +638,7 @@ It is clear that the first request was an `Allocate Request`. Essentially, this 
 
 ###### Allocate Error Response
 
-![](Pasted%20image%2020261113145028.png)
+![](images/Pasted%20image%2020261113145028.png)
 
 In response, a packet arrived with the message type `Allocate Error Response`, indicating that the server rejected the initial request.
 
@@ -650,7 +650,7 @@ In the attributes, you can see `ERROR-CODE 401 (Unauthenticated)`, which explain
 
 ###### Allocate Request
 
-![](Pasted%20image%2020261113145641.png)
+![](images/Pasted%20image%2020261113145641.png)
 
 The client sends another request to the TURN server to obtain a relayed address.
 However, unlike the first request, this one includes the following attributes:
@@ -660,7 +660,7 @@ However, unlike the first request, this one includes the following attributes:
 
 ###### Allocate Success Response
 
-![](Pasted%20image%2020261113150739.png)
+![](images/Pasted%20image%2020261113150739.png)
 
 In the response, we can see that the server sent a successful response with a dedicated address.
 
@@ -672,23 +672,23 @@ In the response, we can see that the server sent a successful response with a de
 
 Next, the client will request another address from the new port and use the `RESERVATION-TOKEN` to obtain the reserved port:
 
-![](Pasted%20image%2020261113152721.png)
+![](images/Pasted%20image%2020261113152721.png)
 
 ###### Refresh Request
 
-![](Pasted%20image%2020261113151505.png)
+![](images/Pasted%20image%2020261113151505.png)
 
 The client sends this request to extend the lifetime of a previously assigned relay address and port on the TURN server.
 
 ###### Refresh Responce
 
-![](Pasted%20image%2020261113151642.png)
+![](images/Pasted%20image%2020261113151642.png)
 
 This is a response from the TURN server confirming that the lifetime timer for the allocated port has been successfully updated.
 
 ###### Channel-Bind Request
 
-![](Pasted%20image%2020261113152153.png)
+![](images/Pasted%20image%2020261113152153.png)
 
 The client sends this request to associate a short 2-byte channel number with a specific IP address and port of the other party (peer). This allows data to be transmitted subsequently with minimal overhead (using compact _ChannelData_ messages instead of bulky _Send/Data_ headers). In addition, binding a channel automatically creates permission to receive traffic from that peer.
 
@@ -698,13 +698,13 @@ The client sends this request to associate a short 2-byte channel number with a 
 
 ###### Channel-Bind Success Responce 
 
-![](Pasted%20image%2020261113153007.png)
+![](images/Pasted%20image%2020261113153007.png)
 
 This is the TURN server's response to a channel binding request, confirming that the channel number has been successfully bound to the peer's address.
 
 ###### CreatePermission Request
 
-![](Pasted%20image%2020261113153550.png)
+![](images/Pasted%20image%2020261113153550.png)
 
 The client sends this request so that the TURN server will allow the reception and forwarding of incoming packets from a specific external address.
 
@@ -712,13 +712,13 @@ The client sends this request so that the TURN server will allow the reception a
 
 ###### CreatePermission Success Response
 
-![](Pasted%20image%2020261113153733.png)
+![](images/Pasted%20image%2020261113153733.png)
 
 This is a confirmation from the TURN server that the filtering rule has been created and that the server will now accept and forward traffic from the specified peer to the client.
 
 ###### TURN ChannelData Message
 
-![](Pasted%20image%2020261113153859.png)
+![](images/Pasted%20image%2020261113153859.png)
 
 This is the actual transmission of payload data to the counterpart via a previously established channel.
 
@@ -875,4 +875,83 @@ According to **RFC 4787**, there are **3 types of mapping** and **3 types of fil
 - **ADF (Address-Dependent)**: only IP addresses to which the internal host has already sent packets.
 - **APDF (Address-and-Port-Dependent)**: only IP:port combinations to which the host has already sent packets.
 
+Add a second public address to **PublicHost**. To do this, first let's find out the interface name. In my case, it's `ens33`:
 
+![](images/Pasted%20image%2020261117193945.png)
+
+Add the static IP address `203.0.113.11/24`:
+
+```bash
+sudo ip address add 203.0.113.11/24 dev ens33
+```
+
+![](images/Pasted%20image%2020261117194138.png)
+
+On the `coturn` server, add an additional IP address and an alternative port. To do this, open the configuration file `/etc/turnserver.conf` and add the following values:
+
+```conf
+listening-ip=203.0.113.11
+alt-listening-port=3479
+
+rfc5780
+```
+
+![](images/Pasted%20image%2020261117193303.png)
+
+Next, delete or comment out the line `no-rfc5780`:
+
+![290](images/Pasted%20image%2020261117194537.png)
+
+Save the configuration and restart the service:
+
+```bash
+sudo systemctl restart coturn
+```
+
+![](images/Pasted%20image%2020261117192920.png)
+
+To determine what type of NAT we’re dealing with, you can run a test:
+1) From the host, send a STUN request to the external server using the first IP address and the first port.
+2) Receive the STUN response (Response 1).
+3) In the same session, send a STUN request to the server’s second external IP address, but using the same port.
+4) Receive a STUN response (response 2).
+5) If **response 1** differs from **response 2**, continue as follows:
+6) In the same session, send a STUN request to the external server’s second IP address and second port.
+7) Receive a STUN response (response 3).
+8) Compare the results.
+
+If
+- Answer 1 = Answer 2, then it is EIM
+- Answer 1 != Answer 2, but Answer 2 = Answer 3, then it is ADM
+- Answer 1 != Answer 2 and Answer 2 != Answer 3, then it is APDM
+
+(Reference: https://www.rfc-editor.org/info/rfc5780/?utm_source=chatgpt.com#section-4.3)
+
+To determine what type of filtering we’re dealing with, we can run a test:
+1) From the host, send a STUN request to the first IP address of the external server.
+2) Receive a STUN response from the primary IP address and port (response 1).
+3) In the same session, send a STUN request to the first IP address, but ask the server to respond from a different IP address and port.
+4) Check whether a response was received (response 2). If a response was received, then we have EIF (lets everyone through). If not, continue.
+5) In the same session, send a STUN request to the first IP address, but ask the server to respond from the same IP address but on a different port.
+6) Check whether a response was received (response 3).
+
+If:
+ - Response 3 was received, then it is ADF (allows access only from a known IP address; the port does not matter).
+ - Neither response 2 nor response 3 was received, then it is APDF (allows access only from a known IP address and a known port).
+
+(Reference: https://www.rfc-editor.org/info/rfc5780/?utm_source=chatgpt.com#section-4.4)
+
+To determine the current **mapping** and **filtering**, you can use a utility from the `coturn` package called `turnutils_natdiscovery`.
+We’ve already set up the necessary configuration for `coturn` above, so let’s move straight on to **Host1**.
+
+On **Host1**, run `turnutils_natdiscovery -m -p 3478 203.0.113.10`. The `-m` flag indicates that we are running the utility to determine the **mapping** type:
+
+![](images/Pasted%20image%2020261117202705.png)
+
+Now, on **Host1**, run `turnutils_natdiscovery -f -p 3478 203.0.113.10`. The `-f` flag indicates that we are running the utility to detect the **filtering** type.
+
+![](images/Pasted%20image%2020261117202909.png)
+
+Based on the test results, it appears that our MikroTik is configured as follows:
+- **Mapping**: EIM
+- **Filtering**: APDF
