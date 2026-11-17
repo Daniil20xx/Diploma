@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Practice (Russian).md",
+                "file": "Practice (English).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Practice (Russian)"
+              "title": "Practice (English)"
             }
           },
           {
@@ -204,8 +204,8 @@
   },
   "active": "178ea5928940b42f",
   "lastOpenFiles": [
-    "Practice (English).md",
     "Practice (Russian).md",
+    "Practice (English).md",
     "images/Pasted image 20261113145028.png",
     "Без названия.canvas",
     "images/Pasted image 20261117202909.png",
